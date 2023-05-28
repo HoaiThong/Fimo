@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Fimo</string>
+    <string name="goi_vay">Gói vay</string>
+    <string name="thoi_gian_vay">Thời gian vay tới 24 tháng</string>
+    <string name="so_tien_vay">Số tiền vay từ 5-50 triệu đồng</string>
+</resources>
