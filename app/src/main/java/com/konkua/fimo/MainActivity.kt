@@ -1,20 +1,30 @@
 package com.konkua.fimo
+
 import android.content.res.Resources
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        var url = "http://www.app.monka.media/nowmoney.php"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+//        val myConnection = MyConnection(applicationContext)
+//        if (myConnection.registerNetworkCallback())
+//            Toast.makeText(applicationContext, "connection", Toast.LENGTH_SHORT).show()
+//        else Toast.makeText(applicationContext, "disconnet", Toast.LENGTH_SHORT).show()
         val viewPager = findViewById<ViewPager2>(R.id.view_pager)
 
         viewPager.apply {
@@ -24,6 +34,11 @@ class MainActivity : AppCompatActivity() {
             (getChildAt(0) as RecyclerView).overScrollMode =
                 RecyclerView.OVER_SCROLL_NEVER // Remove the scroll effect
         }
+        Thread {
+            val httpConnection = MyHttpConnection()
+            var strRespone = httpConnection.getRespone(url)
+        }.start()
+
 
         val demoData = arrayListOf(
             "Curabitur sit amet rutrum enim, sit amet commodo urna. Nullam nec nisl eget purus vulputate ultrices nec sit amet est. Sed sodales maximus risus sit amet placerat.",
@@ -42,5 +57,21 @@ class MainActivity : AppCompatActivity() {
             page.scaleY = (0.80f + r * 0.20f)
         }
         viewPager.setPageTransformer(compositePageTransformer)
+    }
+
+    fun toArrayList(jsonString: String): ArrayList<Robocash> {
+        val listRo = ArrayList<Robocash>()
+        val robocash = Robocash()
+        // get JSONObject from JSON file
+        val obj = JSONObject(jsonString)
+        // fetch JSONObject named employee
+        val jsonArray: JSONArray = obj.getJSONArray("CASH")
+        (0 until jsonArray.length()).forEach {
+            val jsonObject = jsonArray.getJSONObject(it)
+            robocash.name = jsonObject.getString("name")
+            listRo.add(robocash)
+        }
+
+        return listRo
     }
 }
