@@ -1,10 +1,14 @@
 package com.konkua.fimo
 
+import com.konkua.fimo.CarouselRVAdapter
 import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
@@ -14,8 +18,12 @@ import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity() {
+    val listRo = ArrayList<Robocash>()
+     var roboList= ArrayList<Robocash>()
+    var myAdapter= CarouselRVAdapter(roboList)
+
     companion object {
-        var url = "http://www.app.monka.media/nowmoney.php"
+        var url = "http://www.app.monka.media/fimo.php"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,21 +42,19 @@ class MainActivity : AppCompatActivity() {
             (getChildAt(0) as RecyclerView).overScrollMode =
                 RecyclerView.OVER_SCROLL_NEVER // Remove the scroll effect
         }
+
+
+        viewPager.adapter = myAdapter
+
         Thread {
             val httpConnection = MyHttpConnection()
-            var strRespone = httpConnection.getRespone(url)
+            val strRespone = httpConnection.getRespone(url)
+            toArrayList(strRespone)
+
+//            myAdapter = CarouselRVAdapter(roboList)
+//            viewPager.adapter = CarouselRVAdapter(listRo)
         }.start()
-
-
-        val demoData = arrayListOf(
-            "Curabitur sit amet rutrum enim, sit amet commodo urna. Nullam nec nisl eget purus vulputate ultrices nec sit amet est. Sed sodales maximus risus sit amet placerat.",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sit amet lectus a mi lobortis iaculis. Mauris odio tortor, accumsan vel gravida sit amet, malesuada a tortor.",
-            "Praesent efficitur eleifend eros quis elementum. Vivamus eget nunc ante. Sed sed sodales libero. Nam ipsum lorem, consequat at ipsum sit amet, tempor vulputate nibh.",
-            "Aliquam sodales imperdiet augue at consectetur. Suspendisse dui mauris, tincidunt non auctor quis, facilisis et tellus.",
-            "Ut non tincidunt neque, et sodales ligula. Quisque interdum in dui sit amet sagittis. Curabitur erat magna, maximus quis libero quis, dapibus eleifend orci."
-        )
-
-        viewPager.adapter = CarouselRVAdapter(demoData)
+        myAdapter.notifyDataSetChanged()
 
         val compositePageTransformer = CompositePageTransformer()
         compositePageTransformer.addTransformer(MarginPageTransformer((40 * Resources.getSystem().displayMetrics.density).toInt()))
@@ -57,21 +63,50 @@ class MainActivity : AppCompatActivity() {
             page.scaleY = (0.80f + r * 0.20f)
         }
         viewPager.setPageTransformer(compositePageTransformer)
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                Log.d("click======>", position.toString())
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+                // useless
+            }
+
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                // useless too
+            }
+        })
     }
 
     fun toArrayList(jsonString: String): ArrayList<Robocash> {
-        val listRo = ArrayList<Robocash>()
-        val robocash = Robocash()
+
+
         // get JSONObject from JSON file
         val obj = JSONObject(jsonString)
         // fetch JSONObject named employee
-        val jsonArray: JSONArray = obj.getJSONArray("CASH")
+        val jsonArray: JSONArray = obj.getJSONArray("FIMO")
         (0 until jsonArray.length()).forEach {
             val jsonObject = jsonArray.getJSONObject(it)
-            robocash.name = jsonObject.getString("name")
-            listRo.add(robocash)
+            val robocash = Robocash()
+            robocash.name = jsonObject.getString("NAME")
+            Log.d("name======>", robocash.name)
+            robocash.affiliate = jsonObject.getString("AFFILIATELINK")
+            robocash.iconLink = jsonObject.getString("NAME")
+            robocash.titleFirst = jsonObject.getString("TITTLE1")
+            robocash.msgFirst = jsonObject.getString("MSG1")
+            robocash.titleSecond = jsonObject.getString("TITTLE2")
+            robocash.msgSecond = jsonObject.getString("MSG2")
+            robocash.titleThird = jsonObject.getString("TITTLE3")
+            robocash.msgThird = jsonObject.getString("MSG3")
+//            listRo.add(robocash)
+            roboList.add(robocash)
         }
 
-        return listRo
+        return roboList
     }
 }

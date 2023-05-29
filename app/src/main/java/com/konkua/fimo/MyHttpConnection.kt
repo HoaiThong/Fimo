@@ -21,12 +21,12 @@ class MyHttpConnection {
                 Log.d("dataHttp======>",data)
                 return data
             } catch (e: Exception) {
-                e.printStackTrace()
+                getRespone(urlString)
             } finally {
                 httpClient.disconnect()
             }
         } else {
-            println("ERROR ${httpClient.responseCode}")
+            getRespone(urlString)
         }
         return ""
     }

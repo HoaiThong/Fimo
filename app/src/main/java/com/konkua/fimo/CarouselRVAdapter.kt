@@ -9,7 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
-class CarouselRVAdapter(private val carouselDataList: ArrayList<String>) :
+class CarouselRVAdapter(private val roboList: ArrayList<Robocash>) :
     RecyclerView.Adapter<CarouselRVAdapter.CarouselItemViewHolder>() {
 
     class CarouselItemViewHolder(view: View) : RecyclerView.ViewHolder(view)
@@ -21,16 +21,21 @@ class CarouselRVAdapter(private val carouselDataList: ArrayList<String>) :
 
     override fun onBindViewHolder(holder: CarouselItemViewHolder, position: Int) {
         val textView = holder.itemView.findViewById<TextView>(R.id.textview)
+        val titlTextView1 = holder.itemView.findViewById<TextView>(R.id.tv_money_tittle)
+        val titlTextView2 = holder.itemView.findViewById<TextView>(R.id.tv_calendar_tittle)
+        val titlTextView3 = holder.itemView.findViewById<TextView>(R.id.tv_nohome_tittle)
         val moreBtn=holder.itemView.findViewById<Button>(R.id.detail_button)
-        textView.text = carouselDataList[position]
+        titlTextView1.text = roboList.get(position).msgFirst
+        titlTextView2.text = roboList.get(position).msgSecond
+        titlTextView3.text = roboList.get(position).msgThird
         moreBtn.setOnClickListener {
-            Log.d("click======>","click")
+            Log.d("click======>",roboList.get(position).name)
         }
 
     }
 
     override fun getItemCount(): Int {
-        return carouselDataList.size
+        return roboList.size
     }
 
 }
