@@ -19,8 +19,8 @@ import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     val listRo = ArrayList<Robocash>()
-     var roboList= ArrayList<Robocash>()
-    var myAdapter= CarouselRVAdapter(roboList)
+    var roboList = ArrayList<Robocash>()
+    var myAdapter = CarouselRVAdapter(roboList,this)
 
     companion object {
         var url = "http://www.app.monka.media/fimo.php"
@@ -54,7 +54,11 @@ class MainActivity : AppCompatActivity() {
 //            myAdapter = CarouselRVAdapter(roboList)
 //            viewPager.adapter = CarouselRVAdapter(listRo)
         }.start()
-        myAdapter.notifyDataSetChanged()
+        viewPager.adapter.run {
+            myAdapter.update(roboList)
+            myAdapter.notifyDataSetChanged()
+        }
+//        myAdapter.notifyDataSetChanged()
 
         val compositePageTransformer = CompositePageTransformer()
         compositePageTransformer.addTransformer(MarginPageTransformer((40 * Resources.getSystem().displayMetrics.density).toInt()))
@@ -96,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             robocash.name = jsonObject.getString("NAME")
             Log.d("name======>", robocash.name)
             robocash.affiliate = jsonObject.getString("AFFILIATELINK")
-            robocash.iconLink = jsonObject.getString("NAME")
+            robocash.iconLink = jsonObject.getString("LOGO")
             robocash.titleFirst = jsonObject.getString("TITTLE1")
             robocash.msgFirst = jsonObject.getString("MSG1")
             robocash.titleSecond = jsonObject.getString("TITTLE2")
