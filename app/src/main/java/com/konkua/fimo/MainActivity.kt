@@ -3,8 +3,11 @@ package com.konkua.fimo
 import com.konkua.fimo.CarouselRVAdapter
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +22,15 @@ import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     val listRo = ArrayList<Robocash>()
-    var roboList = ArrayList<Robocash>()
-    var myAdapter = CarouselRVAdapter(roboList,this)
+     var roboList = ArrayList<Robocash>()
+    lateinit var courseRV: RecyclerView
+    lateinit var myAdapter: CarouselRVAdapter
+
+
+    private var progressBar: ProgressBar? = null
+    private var i = 0
+    private var txtView: TextView? = null
+    private val handler = Handler()
 
     companion object {
         var url = "http://www.app.monka.media/fimo.php"
@@ -29,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        progressBar = findViewById<ProgressBar>(R.id.progress_Bar) as ProgressBar
+        txtView = findViewById<TextView>(R.id.text_view)
+
 //        val myConnection = MyConnection(applicationContext)
 //        if (myConnection.registerNetworkCallback())
 //            Toast.makeText(applicationContext, "connection", Toast.LENGTH_SHORT).show()
@@ -44,20 +57,45 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        viewPager.adapter = myAdapter
+        progressBar!!.visibility= View.VISIBLE
 
-        Thread {
+        i = progressBar!!.progress
+        Thread(Runnable {
             val httpConnection = MyHttpConnection()
             val strRespone = httpConnection.getRespone(url)
             toArrayList(strRespone)
+            // this loop will run until the value of i becomes 99
+            while (i < 100) {
+                i += 1
+                // Update the progress bar and display the current value
+                handler.post(Runnable {
+                    progressBar!!.progress = i
+                    // setting current progress to the textview
+                    txtView!!.text = i.toString() + "/" + progressBar!!.max
+                })
+                try {
+                    Thread.sleep(40)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+            }
+            handler.post(Runnable {
+                myAdapter = CarouselRVAdapter(roboList,this)
+                viewPager.adapter = myAdapter
+            })
 
-//            myAdapter = CarouselRVAdapter(roboList)
-//            viewPager.adapter = CarouselRVAdapter(listRo)
-        }.start()
-        viewPager.adapter.run {
-            myAdapter.update(roboList)
-            myAdapter.notifyDataSetChanged()
-        }
+
+            // setting the visibility of the progressbar to invisible
+            // or you can use View.GONE instead of invisible
+            // View.GONE will remove the progressbar
+            progressBar!!.visibility = View.INVISIBLE
+
+        }).start()
+
+//        viewPager.adapter.run {
+//            myAdapter.update(roboList)
+//            myAdapter.notifyDataSetChanged()
+//        }
 //        myAdapter.notifyDataSetChanged()
 
         val compositePageTransformer = CompositePageTransformer()
